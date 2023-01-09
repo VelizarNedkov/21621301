@@ -35,7 +35,7 @@ public:
 	//Operator <
 	friend bool operator<(const Student& obj1, const Student& obj2)
 	{
-		if (obj1.fn < obj2.fn)
+		if (obj1.mark < obj2.mark)
 			return true;
 		else
 			return false;
@@ -52,7 +52,7 @@ public:
 	//Operator <<
 	friend ostream& operator <<(ostream& out, const Student& obj1)
 	{
-		out << "Mark: " << obj1.fn << "Fac number: " << obj1.mark << endl;
+		out << "Fac number: " << obj1.fn << " " << "Mark: " << obj1.mark << endl;
 		return out;
 	}
 	//Operator >>
@@ -69,7 +69,7 @@ private:
 	virtual Student& ExtractBestStudent(const set<Student>& exreport1, const set<Student>& exreport2) = 0;
 };
 
-class Protocol:BestStudent
+class Protocol :BestStudent
 {
 private:
 	string pname;
@@ -117,7 +117,8 @@ public:
 	//Operator <<
 	friend ostream& operator <<(ostream& out, const Protocol& obj1)
 	{
-		out << "Protocol name: " << obj1.pname << "Danni na student: ";
+		out << "Protocol name: " << obj1.pname << endl
+			<< "Danni na student: " << endl;
 		for (auto itr = obj1.students.begin(); itr != obj1.students.end(); itr++) {
 			out << *itr;
 		}
@@ -133,37 +134,50 @@ public:
 	//Virtual functon
 	Student& ExtractBestStudent(const set<Student>& exreport1, const set<Student>& exreport2)
 	{
-		set<Student>::iterator itr;
 		Student bestStudent;
+		set<Student> resultreport;
 		double highestmark = 2.0;
-		for (const Student& student : exreport1) {
-			if (student.GetMark() > highestmark) {
-				highestmark = student.GetMark();
-				bestStudent = student;
+		for (const Student student1 : exreport1) {
+			if (student1.GetMark() > highestmark) {
+				highestmark = student1.GetMark();
+				bestStudent = student1;
 			}
 		}
-
-		for (const Student& student : exreport2) {
-			if (student.GetMark() > highestmark) {
-				highestmark = student.GetMark();
-				bestStudent = student;
-			}
-		}
+		set_intersection(exreport1.begin(), exreport1.end(), exreport2.begin(),
+			exreport2.end(), inserter(resultreport, resultreport.begin()), comp);
 		return bestStudent;
 	}
-	set<vector<Student>> CreateSet(set<vector<Student>>report1, set<vector<Student>>report2)
+	multiset<Student> CreateSet()
 	{
-		set<vector<Student>> resultreport;
-
-    	set_union(report1.begin(), report1.end(), report2.begin(),
-		report2.end(), inserter(resultreport, resultreport.begin()));
+		multiset<Student> resultreport(students.begin(), students.end());
 		return resultreport;
+	}
+	//Функция, която връща най добрият студент.Извисва Createset() и извиква BestStudent. Тази функция ще се използва в main(). 
+	//upper_bound, lower_bound
+	Student HightestMark()
+	{
+		Student bestStudent;
+		ExtractBestStudent();
+		return bestStudent;
+	}
+	//Функция Compare comp(), която се използва от set_intersection();
+	static bool comp(const Student& student1, const Student& student2)
+	{
+		if (student1.GetMark() < student2.GetMark()
+			|| (student1.GetMark() == student2.GetMark() && student1.GetFn() < student2.GetFn()))
+		{
+			return true;
+		}
+		else
+			return false;
 	}
 };
 
 int main()
 {
 	Protocol protocol1("data.txt");
+	cout << protocol1;
 	Protocol protocol2("data1.txt");
+	cout << protocol2;
 	return 0;
 }
